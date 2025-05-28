@@ -1,4 +1,6 @@
-﻿namespace FinanceApp
+﻿using FinanceApp;
+
+namespace FinanceApp
 {
     public static class ReportGenerator
     {
