@@ -11,7 +11,7 @@ namespace FinanceApp
 
         public abstract string GetTransactionType();
 
-        public abstract bool IsIncome { get; }
+        public abstract bool IsIncome { get; } 
 
         public virtual void Validate()
         {

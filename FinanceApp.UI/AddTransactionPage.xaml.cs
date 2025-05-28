@@ -1,0 +1,91 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Windows;
+using System.Windows.Controls;
+using FinanceApp.UI.ViewModels;
+
+namespace FinanceApp.UI
+{
+    public partial class AddTransactionPage : Page
+    {
+        private readonly MainViewModel _mainViewModel;
+        private readonly Frame _mainFrame;
+
+        private readonly List<string> _expenseCategories = new()
+        {
+            "Food", "Eating Out", "Transport", "Purchases", "Utilities", "Entertainment", "Services"
+        };
+
+        private readonly List<string> _incomeCategories = new()
+        {
+            "Salary", "Gift", "Transfer"
+        };
+
+        public AddTransactionPage(MainViewModel viewModel, Frame mainFrame)
+        {
+            InitializeComponent();
+            _mainViewModel = viewModel;
+            _mainFrame = mainFrame;
+
+            this.Loaded += AddTransactionPage_Loaded;
+        }
+
+        private void AddTransactionPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            FillCategories(isIncome: false);
+        }
+
+        private void TransactionTypeComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (TransactionTypeComboBox.SelectedItem is ComboBoxItem selectedItem)
+            {
+                var selected = selectedItem.Content.ToString();
+                FillCategories(isIncome: selected == "Income");
+            }
+        }
+
+        private void FillCategories(bool isIncome)
+        {
+            if (CategoryComboBox == null)
+                return;
+
+            CategoryComboBox.ItemsSource = isIncome ? _incomeCategories : _expenseCategories;
+
+            if (CategoryComboBox.Items.Count > 0)
+                CategoryComboBox.SelectedIndex = 0;
+        }
+
+        private void Confirm_Click(object sender, RoutedEventArgs e)
+        {
+            if (decimal.TryParse(AmountTextBox.Text, out var amount) &&
+                CategoryComboBox.SelectedItem is string category)
+            {
+                var isIncome = ((ComboBoxItem)TransactionTypeComboBox.SelectedItem).Content.ToString() == "Income";
+                var date = TransactionDatePicker.SelectedDate ?? DateTime.Today;
+
+                AbstractTransaction transaction = isIncome
+                    ? new IncomeTransaction(amount, date, category)
+                    : new ExpenseTransaction(amount, date, category);
+
+                // Додаємо транзакцію в головну модель
+                _mainViewModel.AddTransaction(transaction);
+
+                _mainFrame.GoBack();
+            }
+            else
+            {
+                MessageBox.Show("Please enter a valid amount and select a category.");
+            }
+        }
+
+        private void Back_Click(object sender, RoutedEventArgs e)
+        {
+            _mainFrame.GoBack();
+        }
+
+        private void Cancel_Click(object sender, RoutedEventArgs e)
+        {
+            _mainFrame.GoBack();
+        }
+    }
+}
