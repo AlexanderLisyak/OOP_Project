@@ -9,7 +9,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Title -->
+        
         <TextBlock Text="Settings" 
                    FontSize="16" 
                    Foreground="White" 
@@ -17,7 +17,7 @@
                    HorizontalAlignment="Left"/>
 
         <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center" Orientation="Vertical">
-            <!-- Currency Selection -->
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
                 <Image Source="/Assets/Icons/currency.png" Width="24" Height="24"/>
                 <TextBlock Text="Selected Currency:" Foreground="White" VerticalAlignment="Center"/>
@@ -27,14 +27,14 @@
                           Foreground="Black"/>
             </StackPanel>
 
-            <!-- Buttons -->
+            
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                 <Button Content="Export .json" Width="100" Click="ExportJson_Click"/>
                 <Button Content="Import .json" Width="100" Click="ImportJson_Click"/>
             </StackPanel>
         </StackPanel>
 
-        <!-- Back Button -->
+        
         <Button Content="→" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,20,0" FontSize="18" Click="GoBack_Click"/>
     </Grid>
 </Page>

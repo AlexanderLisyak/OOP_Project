@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Transactions;
+using Newtonsoft.Json;
 using System.IO;
-using System.Text.Json;
 
 namespace FinanceApp.UI.ViewModels
 {
@@ -15,7 +14,6 @@ namespace FinanceApp.UI.ViewModels
         public ObservableCollection<AbstractTransaction> Transactions { get; set; } = new();
 
         public List<Currency> AvailableCurrencies { get; } = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
-
 
         private decimal _totalBalance;
         public decimal TotalBalance
@@ -38,12 +36,13 @@ namespace FinanceApp.UI.ViewModels
                 OnPropertyChanged(nameof(CategoryTotals));
             }
         }
+
         private void CalculateCategoryTotals()
         {
             CategoryTotals = Transactions
-                .Where(t => !t.IsIncome) 
+                .Where(t => !t.IsIncome)
                 .GroupBy(t => t.Category)
-                .ToDictionary(g => g.Key, g => g.Sum(t => Math.Abs(t.Amount)));
+                .ToDictionary(g => g.Key, g => Math.Abs(g.Sum(t => t.Amount)));
         }
 
         public void AddTransaction(AbstractTransaction transaction)
@@ -55,13 +54,13 @@ namespace FinanceApp.UI.ViewModels
 
             if (transaction is IncomeTransaction)
                 TotalBalance += transaction.Amount;
-            else if (transaction is ExpenseTransaction)
+            else
                 TotalBalance -= transaction.Amount;
 
             if (!_categoryTotals.ContainsKey(transaction.Category))
                 _categoryTotals[transaction.Category] = 0;
 
-            _categoryTotals[transaction.Category] += transaction is IncomeTransaction
+            _categoryTotals[transaction.Category] += transaction.IsIncome
                 ? transaction.Amount
                 : -transaction.Amount;
 
@@ -81,19 +80,31 @@ namespace FinanceApp.UI.ViewModels
 
         public void SaveToJson(string path)
         {
-            var data = new
+            var settings = new JsonSerializerSettings
+            {
+                Formatting = Formatting.Indented,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            };
+
+            var data = new JsonData
             {
                 Currency = SelectedCurrency,
-                Transactions = Transactions
+                Transactions = Transactions.ToList()
             };
-            var json = JsonSerializer.Serialize(data, new JsonSerializerOptions { WriteIndented = true });
+
+            var json = JsonConvert.SerializeObject(data, settings);
             File.WriteAllText(path, json);
         }
 
         public void LoadFromJson(string path)
         {
             var json = File.ReadAllText(path);
-            var data = JsonSerializer.Deserialize<JsonData>(json);
+            var settings = new JsonSerializerSettings
+            {
+                Converters = new List<JsonConverter> { new TransactionJsonConverter() }
+            };
+
+            var data = JsonConvert.DeserializeObject<JsonData>(json, settings);
 
             if (data != null)
             {
@@ -120,6 +131,8 @@ namespace FinanceApp.UI.ViewModels
         private class JsonData
         {
             public Currency Currency { get; set; }
+
+            [JsonProperty(ItemConverterType = typeof(TransactionJsonConverter))]
             public List<AbstractTransaction> Transactions { get; set; } = new();
         }
 

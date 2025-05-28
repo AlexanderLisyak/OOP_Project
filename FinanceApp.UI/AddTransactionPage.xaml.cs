@@ -67,7 +67,7 @@ namespace FinanceApp.UI
                     ? new IncomeTransaction(amount, date, category)
                     : new ExpenseTransaction(amount, date, category);
 
-                // Додаємо транзакцію в головну модель
+                
                 _mainViewModel.AddTransaction(transaction);
 
                 _mainFrame.GoBack();
