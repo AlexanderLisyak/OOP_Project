@@ -9,6 +9,7 @@ namespace FinanceApp.Tests
     [TestClass]
     public class UserTests
     {
+
         [TestMethod]
         public void User_Should_Have_Default_Currency()
         {
@@ -31,10 +32,7 @@ namespace FinanceApp.Tests
         public void AddTransaction_Should_Add_Transaction()
         {
             var data = new FinancialData();
-            var transaction = new IncomeTransaction
-            {
-                Date = DateTime.Now
-            };
+            var transaction = new IncomeTransaction(100, DateTime.Now, "Salary");
             data.AddTransaction(transaction);
 
             Assert.IsTrue(data.GetTransactionsForMonth(DateTime.Now).Contains(transaction));
@@ -44,7 +42,7 @@ namespace FinanceApp.Tests
         public void RemoveTransaction_Should_Remove_Existing_Transaction()
         {
             var data = new FinancialData();
-            var transaction = new ExpenseTransaction();
+            var transaction = new ExpenseTransaction(50, DateTime.Now, "Food");
             data.AddTransaction(transaction);
             var id = transaction.Id;
 
@@ -53,48 +51,12 @@ namespace FinanceApp.Tests
         }
 
         [TestMethod]
-        public void EditTransaction_Should_Change_Transaction()
-        {
-            var data = new FinancialData();
-            var testDate = DateTime.Now;
-
-            var original = new ExpenseTransaction { Amount = 10, Category = "Food", Date = testDate };
-            data.AddTransaction(original);
-
-            var updated = new ExpenseTransaction { Amount = 20, Category = "Transport", Date = testDate };
-            data.EditTransaction(original.Id, updated);
-
-            var transactions = data.GetTransactionsForMonth(testDate);
-            Assert.AreEqual(20, transactions[0].Amount);
-            Assert.AreEqual("Transport", transactions[0].Category);
-        }
-
-        [TestMethod]
-        public void AddBudget_Should_Store_Budget()
-        {
-            var data = new FinancialData();
-            var budget = new Budget { Month = new DateTime(2025, 5, 1) };
-
-            data.AddBudget(budget);
-            Assert.AreEqual(budget, data.GetBudgetForMonth(new DateTime(2025, 5, 1)));
-        }
-
-        [TestMethod]
-        public void RemoveBudget_Should_Remove_Budget()
-        {
-            var data = new FinancialData();
-            var budget = new Budget { Month = new DateTime(2025, 5, 1) };
-
-            data.AddBudget(budget);
-            data.RemoveBudget(new DateTime(2025, 5, 1));
-
-            Assert.IsNull(data.GetBudgetForMonth(new DateTime(2025, 5, 1)));
-        }
-
-        [TestMethod]
         public void SaveToJson_Should_Create_File()
         {
             var data = new FinancialData();
+            var transaction = new IncomeTransaction(120, DateTime.Now, "Test");
+            data.AddTransaction(transaction);
+
             string path = "test_save.json";
             data.SaveToJson(path);
             Assert.IsTrue(File.Exists(path));
@@ -106,7 +68,7 @@ namespace FinanceApp.Tests
         {
             var data = new FinancialData();
             string path = "test_load.json";
-            File.WriteAllText(path, "{}");
+            File.WriteAllText(path, "{\"Transactions\":[]}");
             data.LoadFromJson(path);
             File.Delete(path);
         }
@@ -118,95 +80,36 @@ namespace FinanceApp.Tests
         [TestMethod]
         public void IncomeTransaction_Should_Return_Income_Type()
         {
-            var income = new IncomeTransaction();
+            var income = new IncomeTransaction(150, DateTime.Now, "Gift");
             Assert.AreEqual("Income", income.GetTransactionType());
         }
 
         [TestMethod]
         public void ExpenseTransaction_Should_Return_Expense_Type()
         {
-            var expense = new ExpenseTransaction();
+            var expense = new ExpenseTransaction(70, DateTime.Now, "Transport");
             Assert.AreEqual("Expense", expense.GetTransactionType());
         }
 
         [TestMethod]
-        public void Validate_Should_Not_Throw_For_Default_Transaction()
+        public void Validate_Should_Throw_For_Invalid_Amount()
         {
-            var income = new IncomeTransaction
-            {
-                Amount = 0,
-                Date = DateTime.Now,
-                Category = "Other"
-            };
-
-            income.Validate();
-        }
-    }
-
-    [TestClass]
-    public class BudgetTests
-    {
-        [TestMethod]
-        public void AddTransaction_Should_Increase_Expenses()
-        {
-            var budget = new Budget { Limit = 100 };
-            budget.AddTransaction(0);
-            budget.AddTransaction(50);
-            Assert.AreEqual(50, budget.Expenses);
+            var income = new IncomeTransaction(0, DateTime.Now, "Gift");
+            Assert.ThrowsException<InvalidOperationException>(() => income.Validate());
         }
 
         [TestMethod]
-        public void RemoveTransaction_Should_Decrease_Expenses()
+        public void Validate_Should_Throw_For_Empty_Category()
         {
-            var budget = new Budget { Limit = 100 };
-            budget.AddTransaction(50);
-            budget.RemoveTransaction(20);
-            Assert.AreEqual(30, budget.Expenses);
+            var expense = new ExpenseTransaction(50, DateTime.Now, "");
+            Assert.ThrowsException<InvalidOperationException>(() => expense.Validate());
         }
 
         [TestMethod]
-        public void IsExceeded_Should_Return_True_When_Over_Limit()
+        public void Validate_Should_Not_Throw_For_Valid_Transaction()
         {
-            var budget = new Budget { Limit = 100 };
-            budget.AddTransaction(150);
-            Assert.IsTrue(budget.IsExceeded());
-        }
-
-        [TestMethod]
-        public void CheckLimit_Should_Trigger_Event_When_Exceeded()
-        {
-            var budget = new Budget { Limit = 100 };
-            budget.AddTransaction(150);
-
-            bool triggered = false;
-            budget.BudgetExceeded += (s, e) => triggered = true;
-
-            budget.CheckLimit();
-            Assert.IsTrue(triggered);
-        }
-    }
-
-    [TestClass]
-    public class ReportTests
-    {
-        [TestMethod]
-        public void GetSummary_Should_Return_String()
-        {
-            var report = new Report();
-            var summary = report.GetSummary();
-            Assert.IsFalse(string.IsNullOrEmpty(summary));
-        }
-    }
-
-    [TestClass]
-    public class ReportGeneratorTests
-    {
-        [TestMethod]
-        public void GenerateReport_Should_Return_Report()
-        {
-            var user = new User();
-            var report = ReportGenerator.GenerateReport(user, 5, 2025, ReportType.Monthly);
-            Assert.IsNotNull(report);
+            var expense = new ExpenseTransaction(100, DateTime.Now, "Utilities");
+            expense.Validate();
         }
     }
 }

@@ -57,30 +57,37 @@ namespace FinanceApp.UI
 
         private void Confirm_Click(object sender, RoutedEventArgs e)
         {
-            if (decimal.TryParse(AmountTextBox.Text, out var amount) &&
-                CategoryComboBox.SelectedItem is string category)
+            
+            if (!decimal.TryParse(AmountTextBox.Text, out var amount) || amount <= 0)
             {
-                var isIncome = ((ComboBoxItem)TransactionTypeComboBox.SelectedItem).Content.ToString() == "Income";
-                var date = TransactionDatePicker.SelectedDate ?? DateTime.Today;
-
-                
-                if (date > DateTime.Today)
-                {
-                    MessageBox.Show("The date cannot be in the future.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                AbstractTransaction transaction = isIncome
-                    ? new IncomeTransaction(amount, date, category)
-                    : new ExpenseTransaction(amount, date, category);
-
-                _mainViewModel.AddTransaction(transaction);
-                _mainFrame.GoBack();
+                MessageBox.Show("Please enter a valid positive amount.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            else
+
+            
+            if (CategoryComboBox.SelectedItem is not string category || string.IsNullOrWhiteSpace(category))
             {
-                MessageBox.Show("Please enter a valid amount and select a category.");
+                MessageBox.Show("Please select a category.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
+
+            
+            var date = TransactionDatePicker.SelectedDate ?? DateTime.Today;
+            if (date > DateTime.Today)
+            {
+                MessageBox.Show("The date cannot be in the future.", "Validation Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            
+            var isIncome = ((ComboBoxItem)TransactionTypeComboBox.SelectedItem).Content.ToString() == "Income";
+
+            AbstractTransaction transaction = isIncome
+                ? new IncomeTransaction(amount, date, category)
+                : new ExpenseTransaction(amount, date, category);
+
+            _mainViewModel.AddTransaction(transaction);
+            _mainFrame.GoBack();
         }
 
         private void Back_Click(object sender, RoutedEventArgs e)

@@ -16,7 +16,7 @@ namespace FinanceApp
 
         public virtual void Validate()
         {
-            if (Amount < 0)
+            if (Amount <= 0)
                 throw new InvalidOperationException("Amount cannot be negative");
             if (string.IsNullOrWhiteSpace(Category))
                 throw new InvalidOperationException("Category is required");
