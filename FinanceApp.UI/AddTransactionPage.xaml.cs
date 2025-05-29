@@ -63,13 +63,18 @@ namespace FinanceApp.UI
                 var isIncome = ((ComboBoxItem)TransactionTypeComboBox.SelectedItem).Content.ToString() == "Income";
                 var date = TransactionDatePicker.SelectedDate ?? DateTime.Today;
 
+                
+                if (date > DateTime.Today)
+                {
+                    MessageBox.Show("The date cannot be in the future.", "Error", MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
                 AbstractTransaction transaction = isIncome
                     ? new IncomeTransaction(amount, date, category)
                     : new ExpenseTransaction(amount, date, category);
 
-                
                 _mainViewModel.AddTransaction(transaction);
-
                 _mainFrame.GoBack();
             }
             else

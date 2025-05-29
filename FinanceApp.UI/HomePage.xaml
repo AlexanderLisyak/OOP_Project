@@ -81,20 +81,31 @@
             </StackPanel>
         </Border>
 
-        
-        <DockPanel DockPanel.Dock="Bottom" LastChildFill="False" Height="80" Background="Black" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
-            
+        <Grid VerticalAlignment="Bottom" Height="80" Grid.ColumnSpan="2">
+            <!-- Фон панели -->
+            <Rectangle Fill="Black" Height="80" VerticalAlignment="Stretch"/>
 
-            <Button Width="60" Height="60" Margin="0" HorizontalAlignment="Center" VerticalAlignment="Center"
-                    Background="#fff" BorderThickness="0" Style="{StaticResource CircleButtonStyle}" Click="AddTransactionButton_Click">
-                <TextBlock Text="+" FontSize="32" Foreground="#000" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <!-- Кнопка "+" по центру снизу -->
+            <Button Width="60" Height="60"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Top"
+            Margin="0,10,0,0"
+            Background="#fff" BorderThickness="0"
+            Style="{StaticResource CircleButtonStyle}"
+            Click="AddTransactionButton_Click">
+                <TextBlock Text="+" FontSize="32" Foreground="#000"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Button>
 
-            <Frame x:Name="MainFrame" NavigationUIVisibility="Hidden"/>
-
-            <Button DockPanel.Dock="Right" Width="40" Margin="10" Background="Transparent" BorderThickness="0" Cursor="Hand" Click="SettingsButton_Click">
+            <!-- Кнопка настроек справа снизу -->
+            <Button Width="40" Height="40"
+            HorizontalAlignment="Right" VerticalAlignment="Bottom"
+            Margin="20"
+            Background="Transparent" BorderThickness="0" Cursor="Hand"
+            Click="SettingsButton_Click">
                 <Image Source="/Assets/Icons/settings.png" Width="24" Height="24"/>
             </Button>
-        </DockPanel>
+        </Grid>
+
     </Grid>
 </Page>

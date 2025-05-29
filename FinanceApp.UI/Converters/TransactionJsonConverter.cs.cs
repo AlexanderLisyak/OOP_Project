@@ -2,7 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace FinanceApp
+namespace FinanceApp.UI.Converters
 {
     public class TransactionJsonConverter : JsonConverter<AbstractTransaction>
     {

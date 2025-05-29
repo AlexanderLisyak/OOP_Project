@@ -41,7 +41,7 @@ namespace FinanceApp.UI
             }
         }
 
-        private void GoBack_Click(object sender, RoutedEventArgs e)
+        private void Back_Click(object sender, RoutedEventArgs e)
         {
             NavigationService?.GoBack();
         }

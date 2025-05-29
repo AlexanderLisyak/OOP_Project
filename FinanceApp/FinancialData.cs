@@ -8,11 +8,10 @@ namespace FinanceApp
     public class FinancialData : IJsonSerializable
     {
         private List<AbstractTransaction> Transactions { get; set; } = new();
-        private List<Budget> Budgets { get; set; } = new();
 
         public void SaveToJson(string path)
         {
-            var json = JsonSerializer.Serialize(new { Transactions, Budgets });
+            var json = JsonSerializer.Serialize(new { Transactions});
             File.WriteAllText(path, json);
         }
 
@@ -25,7 +24,6 @@ namespace FinanceApp
                 if (data != null)
                 {
                     Transactions = data.Transactions ?? new List<AbstractTransaction>();
-                    Budgets = data.Budgets ?? new List<Budget>();
                 }
             }
         }
@@ -49,30 +47,20 @@ namespace FinanceApp
                 throw new ArgumentException("Transaction not found");
         }
 
-        public void AddBudget(Budget budget)
-        {
-            Budgets.Add(budget);
-        }
-
-        public void RemoveBudget(DateTime month)
-        {
-            Budgets.RemoveAll(b => b.Month.Year == month.Year && b.Month.Month == month.Month);
-        }
-
-        public Budget? GetBudgetForMonth(DateTime month)
-        {
-            return Budgets.FirstOrDefault(b => b.Month.Year == month.Year && b.Month.Month == month.Month);
-        }
 
         public List<AbstractTransaction> GetTransactionsForMonth(DateTime month)
         {
             return Transactions.Where(t => t.Date.Year == month.Year && t.Date.Month == month.Month).ToList();
         }
 
+        public List<AbstractTransaction> GetAllTransactions()
+        {
+            return new List<AbstractTransaction>(Transactions);
+        }
+
         private class FinancialDataJsonModel
         {
             public List<AbstractTransaction>? Transactions { get; set; }
-            public List<Budget>? Budgets { get; set; }
         }
     }
 }

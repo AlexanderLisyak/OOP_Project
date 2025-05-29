@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using Newtonsoft.Json;
 using System.IO;
+using FinanceApp.UI.Converters;
 
 namespace FinanceApp.UI.ViewModels
 {
@@ -12,6 +13,7 @@ namespace FinanceApp.UI.ViewModels
     {
         public ObservableCollection<AbstractTransaction> RecentTransactions { get; set; } = new();
         public ObservableCollection<AbstractTransaction> Transactions { get; set; } = new();
+
 
         public List<Currency> AvailableCurrencies { get; } = Enum.GetValues(typeof(Currency)).Cast<Currency>().ToList();
 
